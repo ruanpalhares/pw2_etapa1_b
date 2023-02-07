@@ -1,5 +1,7 @@
-const meuModulo = require('./soma')
-const soma = meuModulo.soma
+const meuModulo = require('./soma.js')
+const calculadora = meuModulo.calculadora
 
-soma(8, 9)
-soma(1254, 552)
+calculadora(26, 52, "+")
+calculadora(50, 24, "-")
+calculadora(4, 24, "*")
+calculadora(60, 5, "-")
