@@ -8,3 +8,4 @@ readline.question("Qual sua linguagem de programação favorita: ", (linguagem) 
     console.log(chalk.red("Sua linguagem favorita é: ")+linguagem)
     readline.close()
 })
+//batatinha
