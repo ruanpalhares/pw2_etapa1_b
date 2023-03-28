@@ -5,8 +5,6 @@ const inquirer = require('inquirer')
 
 //#region Módulos Internos
 const fs = require('fs')
-const { type } = require('os')
-const { clearScreenDown } = require('readline')
 //#endregion
 
 operation()
@@ -33,8 +31,10 @@ function operation(){
             createAccount()
         }else if(action === 'Consultar saldo'){
             console.log('Consulatndo seu saldo...')
+            accountBalance()
         }else if(action === 'Depositar'){
             console.log('Depositando em sua conta...')
+            deposit()
         }else if(action === 'Sacar'){
             console.log('Sacando de sua conta...')
         }else if(action === 'Sair'){
@@ -129,6 +129,50 @@ function getAccount(accountName){
     return JSON.parse(accountJSON)
 }
 function addAmount(accountName, amount){
+    const accountData = getAccount(accountName)
 
+    if(!amount){
+        console.log(chalk.bgRed.black('O montante não é válido.'))
+        return deposit()
+    }
+
+    accountData.balance = parseFloat(amount)+parseFloat(accountData.balance)
+
+    fs.writeFileSync(`accounts/${accountName}.json`,
+    JSON.stringify(accountData),
+    function (err){
+        console.log(err)
+    })
+
+    console.log(chalk.green(`Depositamos: R$ ${amount} na conta ${accountName}.`))
+}
+//#endregion
+
+//#region Consultar Saldo
+function accountBalance(){
+    inquirer.prompt([
+        {
+            name: 'accountName',
+            message: 'Qual conta deseja o saldo?'
+        }
+    ]).then((answer) =>{
+        const accountName = answer['accountName']
+
+        if(!checkAccount(accountName)){
+            return accountBalance()
+        }
+
+        const accountData = getAccount(accountName)
+
+        if(accountData.balance>0){
+            console.log(chalk.green(`Saldo: ${accountData.balance}`))
+            
+        }else{
+            console.log(chalk.red(`Saldo: ${accountData.balance}`))
+        }
+        setTimeout(() => {
+            operation()  
+        }, 10000);
+    })
 }
 //#endregion
