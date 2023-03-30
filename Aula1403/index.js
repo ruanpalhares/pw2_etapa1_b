@@ -30,15 +30,16 @@ function operation(){
             console.log('Criando a conta...')
             createAccount()
         }else if(action === 'Consultar saldo'){
-            console.log('Consulatndo seu saldo...')
+            console.log('Consultando seu saldo...')
             accountBalance()
         }else if(action === 'Depositar'){
             console.log('Depositando em sua conta...')
             deposit()
         }else if(action === 'Sacar'){
             console.log('Sacando de sua conta...')
+            withdraw()
         }else if(action === 'Sair'){
-            console.log(chalk.bgBlue.black('SAINDO DA APLICAÇÃO CONTAS ETEC'))
+            console.log(chalk.bgRed.black('SAINDO DA APLICAÇÃO CONTAS ETEC'))
             setTimeout(() => {
                 process.exit()
             }, 1500);
@@ -75,7 +76,7 @@ function buildAccount(){
 
         fs.writeFileSync(
             `accounts/${accountName}.json`,
-            '{"balance":0}',
+            '{"balance":0, "limit": 1000}',
             function (err){
                 console.error(err)
             }
@@ -94,7 +95,7 @@ function deposit(){
             message:'Para qual conta irá o depósito?'
         }
     ]).then((answer) => {
-        const accountName =answer['accountName']
+        const accountName = answer['accountName']
         if(!checkAccount(accountName)){
             return deposit()
         }
@@ -172,7 +173,72 @@ function accountBalance(){
         }
         setTimeout(() => {
             operation()  
-        }, 10000);
+        }, 1000);
     })
 }
 //#endregion
+
+//#region Sacar do Saldo
+function withdraw() {
+    inquirer.prompt([
+        {
+            name: 'accountName',
+            message: 'De qual conta deseja sacar?'
+        }
+    ]).then((answer) => {
+        const accountName = answer['accountName']
+
+        if(!checkAccount(accountName)){
+            return withdraw()
+        }
+
+        inquirer.prompt([
+            {
+                name: 'amount',
+                message: 'Quanto você deseja sacar?'
+            }
+        ]).then((answear) => {
+            const amount = answear['amount']
+            if(removeAmount(accountName, amount)){
+                setTimeout(() => {
+                    operation()
+                }, 3000);
+            }
+        })
+    })
+}
+function removeAmount(accountName, amount) {
+    const accountData = getAccount(accountName)
+
+    if(!amount){
+        console.log(chalk.bgRed.black('Não ha valor a ser sacado'));
+        return withdraw()
+    }
+
+
+    if(accountData.balance<amount){
+        console.log(chalk.bgRed.black('Você ira entrar no cheque especial!'))
+    }
+    
+    if((accountData.balance+accountData.limit)<amount){
+        console.log(chalk.bgRed.black('Você estourou seu limite!'))
+        return 
+        
+    }else{
+        accountData.balance = parseFloat(accountData.balance)-parseFloat(amount)
+
+        fs.writeFileSync(
+            `accounts/${accountName}.json`,
+            JSON.stringify(accountData),
+            function (err){
+                console.log(err)
+            }
+        )
+        console.log(chalk.blue(`Você sacou: ${amount} da conta ${accountName}`))
+        console.log(chalk.bgWhite.blue(`Seu saldo ficou: ${accountData.balance}`))
+    }
+}
+
+//#endregion
+
+//funciona diacho
