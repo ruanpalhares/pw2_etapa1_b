@@ -241,4 +241,3 @@ function removeAmount(accountName, amount) {
 
 //#endregion
 
-//funciona diacho
